@@ -19,3 +19,15 @@ version: v0.125.0
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
 appVersion: "1.16.0"
+
+keywords:
+  - platform
+home: https://kratix.io/
+icon: https://s.giantswarm.io/app-icons/kratix/1/light.png
+annotations:
+  application.giantswarm.io/team: "honeybadger"
+  config.giantswarm.io/version: 1.x.x
+restrictions:
+  clusterSingleton: true
+  namespaceSingleton: false
+upstreamChartVersion: 0.125.0
