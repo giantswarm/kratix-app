@@ -6,6 +6,7 @@ metadata:
     app.kubernetes.io/instance: kratix-platform
     app.kubernetes.io/part-of: kratix
     control-plane: controller-manager
+    {{- include "common.labels" . | nindent 4 }}
   name: kratix-platform-system
 ---
 apiVersion: v1
@@ -15,6 +16,7 @@ metadata:
     app.kubernetes.io/component: kratix-manager
     app.kubernetes.io/instance: kratix-platform
     app.kubernetes.io/part-of: kratix
+    {{- include "common.labels" . | nindent 4 }}
   name: kratix-platform-controller-manager
   namespace: kratix-platform-system
 ---
@@ -25,6 +27,7 @@ metadata:
     app.kubernetes.io/component: kratix-manager
     app.kubernetes.io/instance: kratix-platform
     app.kubernetes.io/part-of: kratix
+    {{- include "common.labels" . | nindent 4 }}
   name: kratix-platform-leader-election-role
   namespace: kratix-platform-system
 rules:
@@ -67,6 +70,7 @@ metadata:
     app.kubernetes.io/component: kratix-manager
     app.kubernetes.io/instance: kratix-platform
     app.kubernetes.io/part-of: kratix
+    {{- include "common.labels" . | nindent 4 }}
   name: kratix-platform-manager-role
 rules:
   - apiGroups:
@@ -324,6 +328,7 @@ metadata:
     app.kubernetes.io/component: kratix-manager
     app.kubernetes.io/instance: kratix-platform
     app.kubernetes.io/part-of: kratix
+    {{- include "common.labels" . | nindent 4 }}
   name: kratix-platform-metrics-reader
 rules:
   - nonResourceURLs:
@@ -338,6 +343,7 @@ metadata:
     app.kubernetes.io/component: kratix-manager
     app.kubernetes.io/instance: kratix-platform
     app.kubernetes.io/part-of: kratix
+    {{- include "common.labels" . | nindent 4 }}
   name: kratix-platform-proxy-role
 rules:
   - apiGroups:
@@ -360,6 +366,7 @@ metadata:
     app.kubernetes.io/component: kratix-manager
     app.kubernetes.io/instance: kratix-platform
     app.kubernetes.io/part-of: kratix
+    {{- include "common.labels" . | nindent 4 }}
   name: kratix-platform-leader-election-rolebinding
   namespace: kratix-platform-system
 roleRef:
@@ -378,6 +385,7 @@ metadata:
     app.kubernetes.io/component: kratix-manager
     app.kubernetes.io/instance: kratix-platform
     app.kubernetes.io/part-of: kratix
+    {{- include "common.labels" . | nindent 4 }}
   name: kratix-platform-manager-rolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -395,6 +403,7 @@ metadata:
     app.kubernetes.io/component: kratix-manager
     app.kubernetes.io/instance: kratix-platform
     app.kubernetes.io/part-of: kratix
+    {{- include "common.labels" . | nindent 4 }}
   name: kratix-platform-proxy-rolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -411,6 +420,7 @@ data:
 kind: ConfigMap
 metadata:
   labels:
+    {{- include "common.labels" . | nindent 4 }}
     app.kubernetes.io/component: kratix-manager
     app.kubernetes.io/instance: kratix-platform
     app.kubernetes.io/part-of: kratix
@@ -421,6 +431,7 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
+    {{- include "common.labels" . | nindent 4 }}
     app.kubernetes.io/component: kratix-manager
     app.kubernetes.io/instance: kratix-platform
     app.kubernetes.io/part-of: kratix
@@ -442,10 +453,10 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
+    {{- include "common.labels" . | nindent 4 }}
     app.kubernetes.io/component: webhook
     app.kubernetes.io/created-by: kratix
     app.kubernetes.io/instance: webhook-service
-    app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/name: service
     app.kubernetes.io/part-of: kratix
   name: kratix-platform-webhook-service
@@ -462,6 +473,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
+    {{- include "common.labels" . | nindent 4 }}
     app.kubernetes.io/component: kratix-manager
     app.kubernetes.io/instance: kratix-platform
     app.kubernetes.io/part-of: kratix
@@ -479,6 +491,7 @@ spec:
   template:
     metadata:
       labels:
+        {{- include "common.labels" . | nindent 8 }}
         app.kubernetes.io/component: kratix-manager
         app.kubernetes.io/instance: kratix-platform
         app.kubernetes.io/part-of: kratix
@@ -506,6 +519,12 @@ spec:
             periodSeconds: 20
           name: manager
           ports:
+            - containerPort: 8080
+              name: metrics
+              protocol: TCP
+            - containerPort: 8081
+              name: health
+              protocol: TCP
             - containerPort: 9443
               name: webhook-server
               protocol: TCP
@@ -524,6 +543,15 @@ spec:
               memory: 100Mi
           securityContext:
             allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
           volumeMounts:
             - mountPath: /tmp/k8s-webhook-server/serving-certs
               name: cert
@@ -535,11 +563,35 @@ spec:
             - --v=10
           image: gcr.io/kubebuilder/kube-rbac-proxy:v0.8.0
           name: kube-rbac-proxy
+          resources:
+            limits:
+              cpu: 100m
+              memory: 100Mi
+            requests:
+              cpu: 100m
+              memory: 100Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
           ports:
             - containerPort: 8443
               name: https
       securityContext:
         runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: "OnRootMismatch"
+        seccompProfile:
+          type: RuntimeDefault
       serviceAccountName: kratix-platform-controller-manager
       terminationGracePeriodSeconds: 10
       volumes:
@@ -552,10 +604,10 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   labels:
+    {{- include "common.labels" . | nindent 4 }}
     app.kubernetes.io/component: certificate
     app.kubernetes.io/created-by: kratix
     app.kubernetes.io/instance: serving-cert
-    app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/name: certificate
     app.kubernetes.io/part-of: kratix
   name: kratix-platform-serving-cert
@@ -573,10 +625,10 @@ apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   labels:
+    {{- include "common.labels" . | nindent 4 }}
     app.kubernetes.io/component: certificate
     app.kubernetes.io/created-by: kratix
     app.kubernetes.io/instance: selfsigned-issuer
-    app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/name: issuer
     app.kubernetes.io/part-of: kratix
   name: kratix-platform-selfsigned-issuer
@@ -590,10 +642,10 @@ metadata:
   annotations:
     cert-manager.io/inject-ca-from: kratix-platform-system/kratix-platform-serving-cert
   labels:
+    {{- include "common.labels" . | nindent 4 }}
     app.kubernetes.io/component: webhook
     app.kubernetes.io/created-by: kratix
     app.kubernetes.io/instance: mutating-webhook-configuration
-    app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/name: mutatingwebhookconfiguration
     app.kubernetes.io/part-of: kratix
   name: kratix-platform-mutating-webhook-configuration
@@ -625,10 +677,10 @@ metadata:
   annotations:
     cert-manager.io/inject-ca-from: kratix-platform-system/kratix-platform-serving-cert
   labels:
+    {{- include "common.labels" . | nindent 4 }}
     app.kubernetes.io/component: webhook
     app.kubernetes.io/created-by: kratix
     app.kubernetes.io/instance: validating-webhook-configuration
-    app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/name: validatingwebhookconfiguration
     app.kubernetes.io/part-of: kratix
   name: kratix-platform-validating-webhook-configuration
