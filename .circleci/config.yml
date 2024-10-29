@@ -6,17 +6,21 @@ orbs:
 workflows:
   package-and-push-chart-on-tag:
     jobs:
-      - architect/push-to-app-catalog:
-          context: "architect"
-          executor: "app-build-suite"
-          name: "package and push chart"
-          app_catalog: "giantswarm-catalog"
-          app_catalog_test: "giantswarm-test-catalog"
-          chart: "kratix"
+    - architect/push-to-app-catalog:
+        context: architect
+        executor: app-build-suite
+        name: package and push chart
+        app_catalog: giantswarm-catalog
+        app_catalog_test: giantswarm-test-catalog
+        chart: kratix
           # This is needed for `architect/run-tests-with-ats` to work
-          persist_chart_archive: true
+        persist_chart_archive: true
           # Trigger job on git tag.
-          filters:
-            tags:
-              only: /^v.*/
-          push_to_oci_registry: true
+        filters:
+          tags:
+            only: /^v.*/
+          branches:
+            ignore:
+            - main
+            - master
+        push_to_oci_registry: true
