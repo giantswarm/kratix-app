@@ -1,6 +1,6 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
-  ]
+    // Base config - https://github.com/giantswarm/renovate-presets/blob/main/default.json5
+    "github>giantswarm/renovate-presets:default.json5",
+  ],
 }
