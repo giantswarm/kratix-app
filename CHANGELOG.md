@@ -7,9 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Migrate Chart.yaml annotations to new format as per https://docs.giantswarm.io/reference/platform-api/chart-metadata/
+
 ## [0.1.0] - 2024-07-24
 
 - initial release compatible with vintage and CAPI
 
 [Unreleased]: https://github.com/giantswarm/kratix-app/compare/v0.1.0...HEAD
+
+### Changed
+
+- Migrate Chart.yaml annotations to new format as per https://docs.giantswarm.io/reference/platform-api/chart-metadata/
 [0.1.0]: https://github.com/giantswarm/kratix-app/releases/tag/v0.1.0
